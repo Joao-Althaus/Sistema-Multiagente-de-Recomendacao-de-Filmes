@@ -181,7 +181,7 @@ def collect_profile_chat(llm) -> UserProfile:
     print()
     _sep_bold()
     print(f"  {bold_yellow('💬  Chat Dinamico')}")
-    print(f"  {gray('Responda 3 perguntas e buscamos o filme certo pra voce.')}")
+    print(f"  {gray('Responda 3 perguntas e buscaremos o filme certo pra voce, caso esteja indeciso pode apertar Enter para pular a pergunta.')}")
     _sep_bold()
     print()
 
@@ -281,45 +281,6 @@ def run_post_menu(orchestrator, profile: UserProfile, movies: List[dict], justif
         else:
             print(f"\n  {red('✗')} Opcao invalida. Digite {yellow('1')}, {yellow('2')} ou {yellow('3')}.\n")
 
-# ── modo teste RAG ────────────────────────────────────────────────────────────
-
-def run_rag_test(rag_engine) -> None:
-    print_banner()
-    print(f"  {bold_cyan('[ MODO TESTE RAG ]')}")
-    print(f"  {gray('Digite uma query em ingles. Comandos: /sair')}\n")
-
-    while True:
-        try:
-            query = input(f"  {cyan('Query')} {gray('›')} ").strip()
-        except (KeyboardInterrupt, EOFError):
-            break
-        if not query or query in ("/sair", "exit", "quit"):
-            break
-
-        print(f"\n  {gray('Buscando:')} {white(query)}\n")
-        results = rag_engine.hybrid_search(query, top_n=5)
-        _sep_bold()
-        print(f"  {bold_yellow(f'Resultados para: \"{query}\"')}")
-        _sep_bold()
-        for rank, movie in enumerate(results, 1):
-            title_r   = movie.get("title", "")
-            year_r    = str(movie.get("year", ""))
-            score_r   = f"score={movie.get('score', 0):.4f}"
-            genres    = ", ".join(movie.get("genres", []))
-            directors = ", ".join(movie.get("director", []))
-            overview  = movie.get("overview", "")[:110]
-            print(f"\n  {bold_yellow(f'#{rank}')}  {bold_white(title_r)}  {gray(year_r)}  {gray(score_r)}")
-            print(f"      {cyan(genres)}  {gray('·')}  {magenta(directors)}")
-            print(f"      {dim(overview)}...")
-            if rank < len(results):
-                print(f"  ", end="")
-                _sep_thin()
-        print()
-        _sep_bold()
-        print()
-
-    print(f"\n  {gray('Encerrando modo de teste.')}\n")
-
 # ── loop principal ────────────────────────────────────────────────────────────
 
 def run(orchestrator) -> None:
@@ -337,24 +298,24 @@ def run(orchestrator) -> None:
         if choice == "1":
             profile = collect_profile_guided()
             if profile.is_empty():
-                print(f"\n  {red('✗ Perfil vazio. Informe ao menos um filme.')}\n")
+                print(f"\n  {red('✗ Perfil de usuário vazio. Responda ao menos uma das perguntas.')}\n")
                 continue
             print(f"\n  {cyan('⟳')} {white('Analisando perfil e buscando recomendacoes...')}\n")
             movies, justifications = orchestrator.recommend(profile)
             display_recommendations(movies, justifications)
-            history.append({"movies": movies, "justifications": justifications})
+            history.append({"filmes": movies, "justificativas": justifications})
             run_post_menu(orchestrator, profile, movies, justifications, history)
 
         # ── 2: chat dinâmico ──
         elif choice == "2":
             profile = collect_profile_chat(orchestrator.llm)
             if profile.is_empty():
-                print(f"\n  {red('✗ Nao foi possivel extrair preferencias. Tente a opcao 1.')}\n")
+                print(f"\n  {red('✗ Nao foi possivel extrair preferencias, favor responder ao menos uma das perguntas. Ou tente a opcao 1.')}\n")
                 continue
             print(f"  {cyan('⟳')} {white('Buscando recomendacoes...')}\n")
             movies, justifications = orchestrator.recommend(profile)
             display_recommendations(movies, justifications)
-            history.append({"movies": movies, "justifications": justifications})
+            history.append({"filmes": movies, "justificativas": justifications})
             run_post_menu(orchestrator, profile, movies, justifications, history)
 
         # ── 3: histórico ──
@@ -364,7 +325,7 @@ def run(orchestrator) -> None:
             else:
                 for i, session in enumerate(history, 1):
                     print(f"\n  {bold(f'── Sessao {i} ──')}")
-                    display_recommendations(session["movies"], session.get("justifications"))
+                    display_recommendations(session["filmes"], session.get("justificativas"))
 
         # ── 0: sair ──
         elif choice == "0":

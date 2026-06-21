@@ -243,6 +243,10 @@ pip install -r requirements.txt
 
 # 4. Garantir que o Ollama está rodando com llama3.2:3b
 ollama serve   # em um terminal separado
+# Em caso de erro verifique o nome do modelo e o local de instalação
+# Para debugging utilize:
+ollama list
+# Faça questão que a versão instalada tem o mesmo exato nome llama3.2:3b
 
 # 5. Iniciar o sistema
 python main.py
