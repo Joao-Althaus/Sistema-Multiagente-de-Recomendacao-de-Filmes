@@ -1,4 +1,4 @@
-# Sistema Multiagente de Recomendação de Filmes
+# Sistema Multiagentes de Recomendação de Filmes
 
 Sistema de recomendação personalizada de filmes baseado em arquitetura multiagente com RAG (Retrieval-Augmented Generation), busca híbrida e LLM local via Ollama.
 
